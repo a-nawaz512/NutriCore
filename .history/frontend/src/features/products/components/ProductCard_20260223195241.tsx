@@ -3,7 +3,7 @@ import Button from "../../../shared/components/ui/Button"
 import Card from "../../../shared/components/ui/Card"
 import { useNavigate } from "react-router-dom"
 import Badge from "../../../shared/components/ui/Badge"
-import type { Product } from "../types"
+import { Product } from "../types"
 
 
 

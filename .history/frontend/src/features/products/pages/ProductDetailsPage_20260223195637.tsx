@@ -6,7 +6,6 @@ import { dummyProducts } from "../components/ProductGrid"
 import ProductImg from "../../../assets/Home/Featured01.jpg"
 import Badge from "../../../shared/components/ui/Badge"
 import { ShieldCheck, Package, Info } from "lucide-react"
-import type { Product } from "../types"
 
 const ProductDetailsPage: FC = () => {
   const location = useLocation()

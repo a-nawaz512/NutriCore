@@ -1,6 +1,5 @@
 import type { FC } from "react"
 import ProductCard from "./ProductCard"
-import type { Product } from "../types"
 
 const productImages = [
   "https://images.pexels.com/photos/4057743/pexels-photo-4057743.jpeg",
