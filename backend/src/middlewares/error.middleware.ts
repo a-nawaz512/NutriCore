@@ -1,17 +1,25 @@
-import { Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from "express";
+import { ApiError } from "../utils/ApiError.js";
 
-export const errorHandler = (
+export const globalErrorHandler = (
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode
+  if (err instanceof ApiError) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+      errors: err.errors || null,
+    });
+  }
 
-  res.status(statusCode).json({
+  // Unexpected / programming errors
+  console.error("UNEXPECTED ERROR:", err);
+
+  return res.status(500).json({
     success: false,
-    message: err.message,
-    stack:
-      process.env.NODE_ENV === "production" ? null : err.stack,
-  })
-}
+    message: "Internal Server Error",
+  });
+};
