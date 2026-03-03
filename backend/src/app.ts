@@ -62,6 +62,11 @@ if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
 
+app.get("/health", (req, res)=>{
+  res.json("Api is working.")
+})
+
+
 // ===============================
 // Routes
 // ===============================
