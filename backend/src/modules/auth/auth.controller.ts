@@ -6,7 +6,6 @@ export const register = async (req: Request, res: Response) => {
 
   const { user, accessToken, refreshToken } =
     await authService.registerUser(body);
-
   res
     .cookie("refreshToken", refreshToken, {
       httpOnly: true,

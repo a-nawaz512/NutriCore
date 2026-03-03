@@ -7,6 +7,7 @@ import compression from "compression";
 // import mongoSanitize from "express-mongo-sanitize"; // ✅ default import
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
+import dotenv from "dotenv";
 
 import routes from "./routes.js"; // ✅ include .js for ESModule runtime
 import { notFound } from "./middlewares/notFound.middleware.js";
@@ -14,7 +15,7 @@ import { globalErrorHandler } from "./middlewares/error.middleware.js";
 // import xss from "xss-clean"; // ✅ default import
 
 const app = express();
-
+dotenv.config();
 // ===============================
 // Body Parsing (Must come first)
 // ===============================
