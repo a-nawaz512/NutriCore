@@ -43,6 +43,8 @@ export const registerSchema = z.object({
   query: z.object({}).optional(),
 });
 
+export type RegisterSchema = typeof registerSchema;
+
 /**
  * Login Validation
  */

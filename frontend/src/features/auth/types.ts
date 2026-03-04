@@ -3,16 +3,19 @@ export interface RegisterInput {
   email: string;
   password: string;
 }
+export interface LoginInput {
+  email: string;
+  password: string;
+}
 
 export interface AuthResponse {
   status: string;
-  token?: string;
+  accessToken: string;
+  user: {
+    _id: string;
+    name: string;
+    email: string;
+    role: "user" | "admin";
+  };
 
-    user: {
-      _id: string;
-      name: string;
-      email: string;
-      role: "user" | "admin";
-    };
-  
 }

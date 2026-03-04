@@ -9,11 +9,8 @@ const router = Router();
 /**
  * Public Routes
  */
-router.post(
-  "/register",
-  validateRequest(registerSchema),
-  authController.register
-);
+router.post("/register",validateRequest(registerSchema),authController.register);
+router.post("/login",validateRequest(loginSchema),authController.login);
 
 // router.post(
 //   "/login",
