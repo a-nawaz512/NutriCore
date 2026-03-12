@@ -3,10 +3,18 @@ import { Link, useLocation } from "react-router-dom"
 import { ShoppingCart, Menu, X, User } from "lucide-react"
 import Button from "../ui/Button"
 import Badge from "../ui/Badge"
+import { useAuthStore } from "../../../app/store/auth.store"
 
 const Header: FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const location = useLocation()
+
+  // const user = useAuthStore((state) => state);
+
+  // console.log("user", user);
+
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const navLinks = [
     { name: "Home", path: "/" },
@@ -33,8 +41,8 @@ const Header: FC = () => {
               key={link.name}
               to={link.path}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.path)
-                  ? "bg-[#25492D] text-white"
-                  : "text-gray-700 hover:bg-green-50 hover:text-[#25492D]"
+                ? "bg-[#25492D] text-white"
+                : "text-gray-700 hover:bg-green-50 hover:text-[#25492D]"
                 }`}
             >
               {link.name}
@@ -42,7 +50,6 @@ const Header: FC = () => {
           ))}
         </nav>
 
-        {/* Cart + Auth Buttons (Desktop) */}
         <div className="hidden md:flex items-center space-x-3">
           <Link to="/cart" className="relative flex items-center p-2 rounded-lg hover:bg-green-50 transition-colors">
             <ShoppingCart size={22} className="text-gray-700 hover:text-[#25492D] transition-colors" />
@@ -50,14 +57,33 @@ const Header: FC = () => {
               2
             </Badge>
           </Link>
-          <Link to="/login">
-            <Button variant="outline" size="sm">Login</Button>
-          </Link>
-          <Link to="/signup">
-            <Button variant="primary" size="sm">Sign Up</Button>
-          </Link>
-        </div>
 
+          {user ? (
+            <>
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-green-50 text-gray-700"
+              >
+                <User size={18} />
+                {user.name}
+              </Link>
+
+              <Button variant="outline" size="sm" onClick={logout}>
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline" size="sm">Login</Button>
+              </Link>
+
+              <Link to="/signup">
+                <Button variant="primary" size="sm">Sign Up</Button>
+              </Link>
+            </>
+          )}
+        </div>
         {/* Mobile: Cart + Toggle */}
         <div className="md:hidden flex items-center gap-3">
           <Link to="/cart" className="relative flex items-center p-1">
@@ -84,8 +110,8 @@ const Header: FC = () => {
                 key={link.name}
                 to={link.path}
                 className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${isActive(link.path)
-                    ? "bg-[#25492D] text-white"
-                    : "text-gray-700 hover:bg-green-50 hover:text-[#25492D]"
+                  ? "bg-[#25492D] text-white"
+                  : "text-gray-700 hover:bg-green-50 hover:text-[#25492D]"
                   }`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
@@ -94,14 +120,47 @@ const Header: FC = () => {
             ))}
           </nav>
           <div className="flex gap-3 px-4 pb-4">
-            <Link to="/login" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="outline" size="sm" className="w-full">
-                <User size={16} className="mr-1" /> Login
-              </Button>
-            </Link>
-            <Link to="/signup" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
-              <Button variant="primary" size="sm" className="w-full">Sign Up</Button>
-            </Link>
+            {user ? (
+              <>
+                <Link
+                  to="/admin/dashboard"
+                  className="flex-1"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Button variant="outline" size="sm" className="w-full">
+                    <User size={16} className="mr-1" />
+                    {user.name}
+                  </Button>
+                </Link>
+
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => {
+                    logout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="outline" size="sm" className="w-full">
+                    <User size={16} className="mr-1" />
+                    Login
+                  </Button>
+                </Link>
+
+                <Link to="/signup" className="flex-1" onClick={() => setIsMobileMenuOpen(false)}>
+                  <Button variant="primary" size="sm" className="w-full">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

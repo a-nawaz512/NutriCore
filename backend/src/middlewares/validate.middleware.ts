@@ -2,16 +2,13 @@ import { Request, Response, NextFunction } from "express";
 import { ZodObject, ZodError } from "zod";
 
 export const validateRequest =
-  (schema: ZodObject) =>
+  (schema: ZodObject<any>) =>
   (req: Request, _res: Response, next: NextFunction) => {
     try {
-      const parsed = schema.parse({
-        body: req.body,
-        params: req.params,
-        query: req.query,
-      });
+      // Parse only req.body (flat) instead of wrapping in body/params/query
+      const parsed = schema.parse(req.body);
 
-      // DO NOT mutate req.body/query/params
+      // Attach validated data
       (req as any).validated = parsed;
 
       next();

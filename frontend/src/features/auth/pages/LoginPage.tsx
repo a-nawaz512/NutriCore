@@ -117,9 +117,9 @@ const LoginPage: FC = () => {
               variant="primary"
               size="lg"
               className="w-full bg-[#25492D] hover:bg-[#1b3421] transition-colors"
-              disabled={loginMutation.isLoading}
+              disabled={loginMutation.isPending}
             >
-              {loginMutation.isLoading ? "Logging in..." : "Login"}
+              {loginMutation.isPending ? "Logging in..." : "Login"}
             </Button>
 
             {loginMutation.isError && (

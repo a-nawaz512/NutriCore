@@ -10,6 +10,7 @@ import rateLimit from "express-rate-limit";
 import dotenv from "dotenv";
 
 import routes from "./routes.js"; // ✅ include .js for ESModule runtime
+import productsRoute from "./modules/product/product.routes.js"
 import { notFound } from "./middlewares/notFound.middleware.js";
 import { globalErrorHandler } from "./middlewares/error.middleware.js";
 // import xss from "xss-clean"; // ✅ default import
@@ -71,6 +72,7 @@ app.get("/health", (req, res)=>{
 // Routes
 // ===============================
 app.use("/api/v1", routes);
+app.use("/api/v1/products", productsRoute);
 
 // ===============================
 // Error Handling

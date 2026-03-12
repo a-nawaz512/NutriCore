@@ -1,29 +1,59 @@
 import { useState, type FC } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, Upload, Plus, X, List, DollarSign, Package } from "lucide-react"
+import toast from "react-hot-toast" // Or your preferred toast library
+
+// Shared UI Components
 import Button from "../../../shared/components/ui/Button"
 import Card from "../../../shared/components/ui/Card"
 import Input from "../../../shared/components/ui/Input"
 import Textarea from "../../../shared/components/ui/Textarea"
 
+// Modular Hook Import
+import { useCreateProduct } from "../hooks/useAddProduct"
+
 const AddProductPage: FC = () => {
     const navigate = useNavigate()
+
+    // Bring in our TanStack mutation
+    const { mutate: createProduct, isPending } = useCreateProduct()
+
     const [formData, setFormData] = useState({
         name: "",
         description: "",
         category: "Vitamins",
         price: "",
         stock: "",
-        images: [] as string[],
+        images: [] as File[],
+        imagePreviews: [] as string[],
         supplementQuantityOptions: [15, 30, 60],
         healthBenefits: [] as string[],
         ingredients: [] as string[],
         usageInstructions: ""
     })
 
-    // Dynamic field handlers
+    // Dynamic field handlers (Unchanged)
     const [newBenefit, setNewBenefit] = useState("")
     const [newIngredient, setNewIngredient] = useState("")
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || [])
+        if (!files.length) return
+        const previews = files.map((file) => URL.createObjectURL(file))
+        setFormData(prev => ({
+            ...prev,
+            images: [...prev.images, ...files],
+            imagePreviews: [...prev.imagePreviews, ...previews]
+        }))
+    }
+
+    const removeImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images.filter((_, i) => i !== index),
+            imagePreviews: prev.imagePreviews.filter((_, i) => i !== index)
+        }))
+    }
 
     const handleBenefitAdd = () => {
         if (newBenefit.trim()) {
@@ -46,7 +76,6 @@ const AddProductPage: FC = () => {
         }))
     }
 
-    // Quantity Options
     const toggleQuantity = (qty: number) => {
         setFormData(prev => {
             const options = prev.supplementQuantityOptions.includes(qty)
@@ -56,11 +85,45 @@ const AddProductPage: FC = () => {
         })
     }
 
+    // Updated Submit Handler with FormData and Mutate Options
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
-        console.log("Submitting Product:", formData)
-        // Simulate API call
-        setTimeout(() => navigate("/admin/dashboard/products"), 1000)
+
+        // 1. Initialize FormData to handle multipart mixed data
+        const formDataToSend = new FormData();
+
+        // 2. Append standard text and number fields
+        formDataToSend.append("name", formData.name);
+        formDataToSend.append("description", formData.description);
+        formDataToSend.append("category", formData.category);
+        formDataToSend.append("price", formData.price.toString());
+        formDataToSend.append("stock", formData.stock.toString());
+        formDataToSend.append("usageInstructions", formData.usageInstructions);
+
+        // 3. Stringify arrays for the backend Zod schema
+        formDataToSend.append("supplementQuantityOptions", JSON.stringify(formData.supplementQuantityOptions));
+        formDataToSend.append("healthBenefits", JSON.stringify(formData.healthBenefits));
+        formDataToSend.append("ingredients", JSON.stringify(formData.ingredients));
+
+        // 4. Append multiple files under the exact same "images" key
+        formData.images.forEach((file) => {
+            formDataToSend.append("images", file);
+        });
+        console.log("data to backend", formData);
+
+
+        // 5. Fire the mutation with localized success/error handling
+        createProduct(formDataToSend, {
+            onSuccess: () => {
+                toast.success("Product created successfully! 🚀");
+                navigate("/admin/dashboard/products");
+            },
+            onError: (error: any) => {
+                // Extracts the error message sent from your Express global error handler
+                const errorMessage = error.response?.data?.message || "Failed to create product. Please try again.";
+                toast.error(errorMessage);
+            }
+        });
     }
 
     return (
@@ -230,8 +293,8 @@ const AddProductPage: FC = () => {
                                     key={qty}
                                     onClick={() => toggleQuantity(qty)}
                                     className={`border rounded-lg p-3 text-center cursor-pointer transition-all ${formData.supplementQuantityOptions.includes(qty)
-                                            ? "border-[#0f4d36] bg-green-50 text-[#0f4d36] font-medium ring-1 ring-[#0f4d36]"
-                                            : "border-gray-200 text-gray-600 hover:border-[#0f4d36]/50"
+                                        ? "border-[#0f4d36] bg-green-50 text-[#0f4d36] font-medium ring-1 ring-[#0f4d36]"
+                                        : "border-gray-200 text-gray-600 hover:border-[#0f4d36]/50"
                                         }`}
                                 >
                                     {qty} caps
@@ -242,19 +305,63 @@ const AddProductPage: FC = () => {
 
                     <Card className="p-6">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Images</h3>
-                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
+
+                        <label className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center text-gray-500 hover:bg-gray-50 transition-colors cursor-pointer">
                             <Upload size={32} className="mb-2 text-gray-400" />
                             <p className="text-sm">Click to upload or drag & drop</p>
                             <p className="text-xs text-gray-400 mt-1">SVG, PNG, JPG (max 2MB)</p>
-                        </div>
+
+                            <input
+                                type="file"
+                                multiple
+                                accept="image/*"
+                                onChange={handleImageUpload}
+                                className="hidden"
+                            />
+                        </label>
+
+                        {/* Image Preview */}
+                        {formData.imagePreviews.length > 0 && (
+                            <div className="grid grid-cols-3 gap-3 mt-4">
+                                {formData.imagePreviews.map((img, i) => (
+                                    <div key={i} className="relative">
+                                        <img
+                                            src={img}
+                                            alt="preview"
+                                            className="w-full h-24 object-cover rounded-lg border"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(i)}
+                                            className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-red-100"
+                                        >
+                                            <X size={14} className="text-red-500" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </Card>
                 </div>
 
-                {/* Footer Actions */}
+                {/* Footer Actions: Updated for Loading State */}
                 <div className="lg:col-span-3 flex justify-end gap-4 mt-4 border-t pt-6">
-                    <Button variant="outline" type="button" onClick={() => navigate(-1)}>Cancel</Button>
-                    <Button variant="primary" type="submit" className="bg-[#13458A] hover:bg-[#0f366e] min-w-[150px]">
-                        Create Product
+                    <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        disabled={isPending}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        type="submit"
+                        disabled={isPending}
+                        className="bg-[#13458A] hover:bg-[#0f366e] min-w-[150px] disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                    >
+                        {isPending ? "Creating..." : "Create Product"}
                     </Button>
                 </div>
 

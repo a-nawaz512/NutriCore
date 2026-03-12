@@ -14,13 +14,19 @@ interface AuthState {
   logout: () => void;
 }
 
+const storedAuth =
+  typeof window !== "undefined"
+    ? JSON.parse(localStorage.getItem("auth") || "null")
+    : null;
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
+  // ✅ load from localStorage on startup
+  user: storedAuth?.user || null,
+  accessToken: storedAuth?.accessToken || null,
 
   setAuth: (user, accessToken) => {
     set({ user, accessToken });
-    // Persist in localStorage
+
     localStorage.setItem(
       "auth",
       JSON.stringify({ user, accessToken })

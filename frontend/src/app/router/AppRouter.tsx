@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react"
 
 import MainLayout from "../../shared/components/layout/MainLayout"
 import AdminLayout from "../../shared/components/layout/AdminLayout"
+import EditProductPage from "../../features/admin/pages/EditProductPage"
 
 const HomePage = lazy(() => import("../../shared/home/pages/HomePage"))
 const AboutPage = lazy(() => import("../../features/about/pages/AboutPage"))
@@ -54,6 +55,7 @@ const AppRouter = () => {
           <Route path="/admin/dashboard" element={<DashboardPage />} />
           <Route path="/admin/dashboard/overview" element={<DashboardPage />} /> {/* Redirect Overview to DashboardPage for now since we merged functionality */}
           <Route path="/admin/dashboard/products" element={<ProductsManagement />} />
+          <Route path="/admin/dashboard/products/:id" element={<EditProductPage />} />
           <Route path="/admin/dashboard/products/add" element={<AddProductPage />} />
           <Route path="/admin/dashboard/orders" element={<OrdersPage />} />
           <Route path="/admin/dashboard/users" element={<UsersPage />} />

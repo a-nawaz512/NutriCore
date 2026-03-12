@@ -16,7 +16,7 @@ export const useRegister = () => {
     mutationFn: registerUser,
     onSuccess: (data) => {
       console.log("backend data", data);
-      setUser(data.user);
+      setUser(data.user, data.accessToken);
       toast.success("Account created successfully!");
       navigate("/"); // redirect after register
     },

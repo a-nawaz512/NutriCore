@@ -5,6 +5,9 @@ import { RegisterSchema } from "./auth.validation.js";
 type ExtendedRequest = Request & {validated: RegisterSchema};
 
 export const register = async (req: ExtendedRequest, res: Response) => {
+
+  
+
   const { body } = req.validated;
 
   const { user, accessToken, refreshToken } =
